@@ -25,6 +25,13 @@ function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
 
+    // Honeypot: the hidden "website" field is invisible to real users. If a
+    // bot filled it (or posted directly, bypassing the page), silently accept
+    // and drop it — no row, no email, and no signal that it was rejected.
+    if (data.website && String(data.website).trim() !== '') {
+      return json({ ok: true });
+    }
+
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName(SHEET_NAME);
     if (!sheet) {
